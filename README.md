@@ -4,6 +4,7 @@ MSJsonKit是用于Objective-C的json序列化库，基于NSJSONSerialization和o
 
 - [Download MSJsonKit](https://github.com/ZoMinster/MSJsonKit/archive/master.zip)
 - 复制MSJsonKit.h和MSJsonKit.m到自己的工程
+- 具体使用方法可以看MSJsonKit.h注释
 
 ## 联系
 
