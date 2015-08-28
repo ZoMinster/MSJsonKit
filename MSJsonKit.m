@@ -73,6 +73,9 @@ static NSString *re = @"(?<=T@\")(.*)(?=\",)";
         [json appendString: [MSJsonKit getNullJsonWithKey: nil]];
     } else if ([obj isKindOfClass: [NSObject class]]) {
         //如果是一个自定义类
+        
+        
+        
         [json appendString: @"{"];
         
         unsigned int outCount;
@@ -87,6 +90,12 @@ static NSString *re = @"(?<=T@\")(.*)(?=\",)";
             objc_property_t prop = props[i];
             NSString *propName = [[NSString alloc] initWithCString: property_getName(prop) encoding: NSUTF8StringEncoding];
             id value = [obj valueForKey: propName];
+            if ([[obj class] conformsToProtocol: @protocol(MSJsonSerializing)]) {
+                NSDictionary *jsonKeyPathsOfProp = [[obj class] JsonKeyPathsByPropertyKey];
+                if (jsonKeyPathsOfProp != nil && [[jsonKeyPathsOfProp allKeys] containsObject: propName]) {
+                    propName = [jsonKeyPathsOfProp objectForKey: propName];
+                }
+            }
             [MSJsonKit objToJson: value out: &json withKey: propName];
 #ifdef DEBUG
             NSLog(@"key: %@", propName);
@@ -95,7 +104,7 @@ static NSString *re = @"(?<=T@\")(.*)(?=\",)";
         }
         
         [json appendString: @"}"];
-    } 
+    }
     
     if (flag == true) {
         [json appendString: @"}"];
@@ -153,6 +162,7 @@ static NSString *re = @"(?<=T@\")(.*)(?=\",)";
 }
 
 +(id)jsonObjToObj: (id)jsonObj asClass:(Class)mclass WithKeyClass: (NSDictionary *) keyClass ForKey:(NSString *)keyName {
+    
     id obj;
     
     if (jsonObj != nil) {
@@ -218,6 +228,7 @@ static NSString *re = @"(?<=T@\")(.*)(?=\",)";
             }
             
             obj = [[mclass alloc] init];
+            
             //遍历属性
             unsigned int outCount;
             
@@ -227,18 +238,27 @@ static NSString *re = @"(?<=T@\")(.*)(?=\",)";
             for (int i = 0; i < outCount; i++) {
                 objc_property_t prop = props[i];
                 NSString *propName = [[NSString alloc] initWithCString: property_getName(prop) encoding: NSUTF8StringEncoding];
+                NSString *dicPropName = [NSString stringWithString: propName];
+                
+                if ([[obj class] conformsToProtocol: @protocol(MSJsonSerializing)]) {
+                    NSDictionary *jsonKeyPathsOfProp = [[obj class] JsonKeyPathsByPropertyKey];
+                    if (jsonKeyPathsOfProp != nil && [[jsonKeyPathsOfProp allKeys] containsObject: propName]) {
+                        dicPropName = [jsonKeyPathsOfProp objectForKey: propName];
+                    }
+                }
                 NSString *propAttr = [[NSString alloc] initWithCString: property_getAttributes(prop) encoding: NSUTF8StringEncoding];
                 if (propName == nil) {
                     continue;
                 } else {
+                    
                     NSRange range = [propAttr rangeOfString: re options: NSRegularExpressionSearch];
-                    if ([dic.allKeys containsObject: propName]) {
+                    if ([dic.allKeys containsObject: dicPropName]) {
                         if (range.length != 0) {
                             NSString *propClassName = [propAttr substringWithRange: range];
                             
-                            if ([dic.allKeys containsObject: propName]) {
+                            if ([dic.allKeys containsObject: dicPropName]) {
                                 Class propClass = objc_getClass([propClassName UTF8String]);
-                                [obj setValue: [MSJsonKit jsonObjToObj: dic[propName] asClass: propClass WithKeyClass: keyClass ForKey: propName] forKey: propName];
+                                [obj setValue: [MSJsonKit jsonObjToObj: dic[dicPropName] asClass: propClass WithKeyClass: keyClass ForKey: propName] forKey: propName];
                             }
                         } else {
                             [obj setValue: [MSJsonKit jsonObjToObj: dic[propName] asClass: [NSNumber class] WithKeyClass: keyClass ForKey: propName] forKey: propName];

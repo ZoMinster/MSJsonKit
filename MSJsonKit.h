@@ -8,6 +8,21 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol MSJsonSerializing <NSObject>
+
+@required
+///示例  key 为属性名，value为json key 名， 不实现该协议就表示属性名和json key名一样
+///+ (NSDictionary *)JSONKeyPathsByPropertyKey {
+///         return @{
+///             @"name": @"name_",
+///             @"myPoint": @"my_point",
+///             @"starred": @"starred"
+///         };
+///     }
++ (NSDictionary *)JsonKeyPathsByPropertyKey;
+
+@end
+
 @interface MSJsonKit : NSObject
 /**
  * obj 转 json
