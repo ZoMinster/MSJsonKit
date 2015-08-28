@@ -57,6 +57,24 @@
  * @result (id) 转化后的objc对象
  */
 +(id)jsonToObj:(NSString *)json asClass:(Class)mclass WithKeyClass: (NSDictionary *) keyClass;
+/**
+ * jsonObj 转 obj
+ * @param json 需转化的json字符串
+ * @param mclass  需转化成的objc类
+ * @param keyClass 如果有某个objc类属性为NSArray或者NSDictionay, 可以传入@{@"asdf"(该属性键): (数组每项的类型或者字典每个值的类型),....},否则传nil
+ *
+ * @result (id) 转化后的objc对象
+ */
++(id)jsonObjToObj: (id)jsonObj asClass:(Class)mclass WithKeyClass: (NSDictionary *) keyClass;
+/**
+ * jsonObj 转 obj
+ * @param json 需转化的json字符串
+ * @param mclass  需转化成的objc类
+ * @param keyClass 如果有某个objc类属性为NSArray或者NSDictionay, 可以传入@{@"asdf"(该属性键): (数组每项的类型或者字典每个值的类型),....},否则传nil
+ *
+ * @result (id) 转化后的objc对象
+ */
++(id)jsonObjToObj: (id)jsonObj asClass:(Class)mclass;
 @end
 
 @interface MSJsonKit(Private)
