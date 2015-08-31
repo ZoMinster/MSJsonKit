@@ -19,18 +19,24 @@
 ///             @"starred": @"starred"
 ///         };
 ///     }
-+ (NSDictionary *)JsonKeyPathsByPropertyKey;
++ (NSDictionary *)jsonKeyPathsByPropertyKey;
+
+@optional
++ (NSDictionary *)jsonValueConverter;
++ (NSDictionary *)objcValueConverter;
 
 @end
 
 @interface MSJsonKit : NSObject
 /**
- * obj 转 json
+ * obj 转 json 该方法将递归调用
  * @param obj objc对象
  * @param jsonAddr  输出json字串地址
  * @param key json字串是否需要加额外的键，不加传nil
+ * @param baseClass 如果是第一次递归调用，该值为obj的类型，否则为其上层对象的类型
+ * @param preKey 如果是第一次递归调用，该值赋值为key一样的值，否则为其上层对象该属性的名称
  */
-+(void)objToJson: (id)obj  out: (NSMutableString **)jsonAddr withKey: (NSString *)key;
++(void)objToJson: (id)obj  out: (NSMutableString **)jsonAddr withKey: (NSString *)key baseClass: (Class)baseClass preKey: (NSString *)preKey;
 
 /**
  *  obj 转 json
@@ -78,10 +84,10 @@
 @end
 
 @interface MSJsonKit(Private)
-+(id)jsonObjToObj: (id)jsonObj asClass:(Class)mclass WithKeyClass: (NSDictionary *) keyClass ForKey: (NSString *)keyName;
-+(NSString *)getStringJson: (NSString *)str withKey: (NSString *)key;
-+(NSString *)getNumberJson: (NSNumber *)num withKey: (NSString *)key;
-+(NSString *)getNullJsonWithKey: (NSString *)key;
-+(NSString *)getBoolJson: (BOOL)flag withKey: (NSString *)key;
-+(NSString *)getDateJson: (NSDate *) date withKey: (NSString *)key;
++(id)jsonObjToObj: (id)jsonObj asClass:(Class)mclass WithKeyClass: (NSDictionary *) keyClass ForKey: (NSString *)keyName baseClass: (Class)baseClass;
++(NSString *)getStringJson: (NSString *)str withKey: (NSString *)key baseClass: (Class)baseClass preKey: (NSString *)preKey;
++(NSString *)getNumberJson: (NSNumber *)num withKey: (NSString *)key baseClass: (Class)baseClass preKey: (NSString *)preKey;
++(NSString *)getNullJsonWithKey: (NSString *)key baseClass: (Class)baseClass preKey: (NSString *)preKey;
++(NSString *)getBoolJson: (BOOL)flag withKey: (NSString *)key baseClass: (Class)baseClass preKey: (NSString *)preKey;
++(NSString *)getDateJson: (NSDate *) date withKey: (NSString *)key baseClass: (Class)baseClass preKey: (NSString *)preKey;
 @end
