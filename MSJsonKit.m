@@ -11,6 +11,8 @@
 
 static NSString *re = @"(?<=T@\")(.*)(?=\",)";
 static NSString *ignorePropNames = @"hash, superclass, description, debugDescription"; //当类实现协议后会自动添加以上四个属性到当前类中，特别是superclass迭代很多十分巨大会递归到死
+static NSString *boolClassNameContain = @"TB";
+static NSString *objClassNameContain = @"NS";
 @implementation MSJsonKit
 
 /**
@@ -254,7 +256,6 @@ static NSString *ignorePropNames = @"hash, superclass, description, debugDescrip
                 } else {
                     obj = [NSDate dateWithTimeIntervalSince1970: [((NSNumber *)jsonObj) doubleValue]/1000];
                 }
-                
             }
         } else if (![mclass isSubclassOfClass: [NSString class]] &&
                    ![mclass isSubclassOfClass: [NSNumber class]] &&
@@ -317,17 +318,18 @@ static NSString *ignorePropNames = @"hash, superclass, description, debugDescrip
                     if ([dic.allKeys containsObject: dicPropName]) {
                         if (range.length != 0) {
                             NSString *propClassName = [propAttr substringWithRange: range];
-                            
+#ifdef DEBUG
+                            NSLog(@"propClassName: %@", propClassName);
+#endif
                             if ([dic.allKeys containsObject: dicPropName]) {
                                 Class propClass = objc_getClass([propClassName UTF8String]);
                                 [obj setValue: [MSJsonKit jsonObjToObj: dic[dicPropName] asClass: propClass WithKeyClass: keyClass ForKey: propName baseClass: mclass] forKey: propName];
                             }
                         } else {
                             if (dic[dicPropName] == nil) {
-                                if ([propAttr rangeOfString: @"TB"].location == NSNotFound) {
-                                    [obj setNilValueForKey: propName];
-                                }
+
                             } else {
+                                
                                 [obj setValue: [MSJsonKit jsonObjToObj: dic[dicPropName] asClass: [NSNumber class] WithKeyClass: keyClass ForKey: propName baseClass: mclass] forKey: propName];
                             }
                             
@@ -339,7 +341,17 @@ static NSString *ignorePropNames = @"hash, superclass, description, debugDescrip
         } else if ([jsonObj isKindOfClass: [NSNull class]]) {
             obj = nil;
         } else {
-            obj = jsonObj;
+            if ([baseClass conformsToProtocol: @protocol(MSJsonSerializing)] && [baseClass respondsToSelector: @selector(jsonValueConverter)]) {
+                NSDictionary *cvtDic = [baseClass jsonValueConverter];
+                if (cvtDic != nil && [cvtDic.allKeys containsObject: keyName]) {
+                    obj = ((id(^)(id obj))[cvtDic objectForKey: keyName])(jsonObj);
+                    
+                } else {
+                    obj = jsonObj;
+                }
+            } else {
+                obj = jsonObj;
+            }
         }
         
         

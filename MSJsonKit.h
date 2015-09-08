@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol MSJsonSerializing <NSObject>
+@protocol MSJsonSerializing
 
 @required
 ///示例  key 为属性名，value为json key 名， 不实现该协议就表示属性名和json key名一样
@@ -22,7 +22,28 @@
 + (NSDictionary *)jsonKeyPathsByPropertyKey;
 
 @optional
+//示例：转化函数返回值必须是NSObject子类，本身属性非NSObject子类的会自动转化，如
+//本身属性      返回值类型     转化后
+//BOOL         NSNumber     !=0 为YES ==0 为NO
+//其他数字类型   NSNumber     与NSNumber同值
+//+ (NSDictionary *)jsonValueConverter {
+//    return @{
+//             @"time": (NSDate *)^(NSNumber *time) {
+//                 return [NSDate dateWithTimeIntervalSince1970: [time doubleValue]];
+//             }
+//             };
+//}
+//
+
 + (NSDictionary *)jsonValueConverter;
+//示例：转化函数返回值必须是NSString类型或其子类
+//+ (NSDictionary *)objcValueConverter {
+//    return @{
+//             @"time": (NSString *)^(NSDate *time) {
+//                 return [NSString stringWithFormat: @"%qi", (long long)([time timeIntervalSince1970])];
+//             }
+//             };
+//}
 + (NSDictionary *)objcValueConverter;
 
 @end
