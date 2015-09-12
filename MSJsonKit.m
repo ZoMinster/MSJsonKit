@@ -85,7 +85,7 @@ static NSString *objClassNameContain = @"NS";
         
         objc_property_t *props = class_copyPropertyList([obj class], &outCount);
         
-        
+        int j = 0;
         for (int i = 0; i < outCount; i++) {
             
             objc_property_t prop = props[i];
@@ -93,11 +93,17 @@ static NSString *objClassNameContain = @"NS";
             if ([ignorePropNames rangeOfString: propName].location != NSNotFound) {
                 continue;
             }
-            
-            if (i != 0) {
-                [json appendString: @","];
+            if ([[obj class] conformsToProtocol: @protocol(MSJsonSerializing)] && [[obj class] respondsToSelector: @selector(toJsonIgnoreKey)]) {
+                NSArray *tjika = [[obj class] toJsonIgnoreKey];
+                if ([tjika containsObject: propName]) {
+                    continue;
+                }
             }
             
+            if (j != 0) {
+                [json appendString: @","];
+            }
+            j++;
             id value = [obj valueForKey: propName];
             NSString *jsonKeyName = [NSString stringWithString: propName];
             if ([[obj class] conformsToProtocol: @protocol(MSJsonSerializing)]) {

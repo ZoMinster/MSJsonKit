@@ -46,6 +46,8 @@
 //}
 + (NSDictionary *)objcValueConverter;
 
++ (NSArray *)toJsonIgnoreKey;
+
 @end
 
 @interface MSJsonKit : NSObject
