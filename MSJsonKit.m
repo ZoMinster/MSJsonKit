@@ -173,8 +173,16 @@ static NSString *objClassNameContain = @"NS";
     NSLog(@"JSON:\n%@", jsonObj);
 #endif
     
+    @try {
+        return [MSJsonKit jsonObjToObj: jsonObj asClass: mclass WithKeyClass: keyClass ForKey: @"msroot" baseClass: mclass];
+    }
+    @catch (NSException *exception) {
+        return nil;
+    }
+    @finally {
+        
+    }
     
-    return [MSJsonKit jsonObjToObj: jsonObj asClass: mclass WithKeyClass: keyClass ForKey: @"msroot" baseClass: mclass];
 }
 
 /**
@@ -193,8 +201,16 @@ static NSString *objClassNameContain = @"NS";
     NSLog(@"JSON:\n%@", jsonObj);
 #endif
     
+    @try {
+        return [MSJsonKit jsonObjToObj: jsonObj asClass: mclass WithKeyClass: keyClass ForKey: @"msroot" baseClass: mclass];
+    }
+    @catch (NSException *exception) {
+        return nil;
+    }
+    @finally {
+        
+    }
     
-    return [MSJsonKit jsonObjToObj: jsonObj asClass: mclass WithKeyClass: keyClass ForKey: @"msroot" baseClass: mclass];
 }
 /**
  * jsonObj 转 obj
@@ -211,9 +227,17 @@ static NSString *objClassNameContain = @"NS";
 #ifdef DEBUG
     NSLog(@"JSON:\n%@", jsonObj);
 #endif
+
+    @try {
+        return [MSJsonKit jsonObjToObj: jsonObj asClass: mclass WithKeyClass: nil ForKey: @"msroot" baseClass: mclass];
+    }
+    @catch (NSException *exception) {
+        return nil;
+    }
+    @finally {
+        
+    }
     
-    
-    return [MSJsonKit jsonObjToObj: jsonObj asClass: mclass WithKeyClass: nil ForKey: @"msroot" baseClass: mclass];
 }
 
 
@@ -233,6 +257,9 @@ static NSString *objClassNameContain = @"NS";
             for (NSString *key in dic) {
                 if ([dic[key] isKindOfClass: [NSArray class]]) { //[dic[key] isKindOfClass: [NSDictionary class]] ||
                     mclass = [dic[key] class];
+                }
+                if (keyClass != nil && [keyClass.allKeys containsObject: key]) {
+                    mclass = (Class)(keyClass[key]);
                 }
                 [obj setObject: [MSJsonKit jsonObjToObj: dic[key] asClass: mclass WithKeyClass: keyClass ForKey:keyName baseClass: mclass] forKey: key];
             }
