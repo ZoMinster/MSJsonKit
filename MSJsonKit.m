@@ -227,7 +227,7 @@ static NSString *objClassNameContain = @"NS";
 #ifdef DEBUG
     NSLog(@"JSON:\n%@", jsonObj);
 #endif
-
+    
     @try {
         return [MSJsonKit jsonObjToObj: jsonObj asClass: mclass WithKeyClass: nil ForKey: @"msroot" baseClass: mclass];
     }
@@ -246,22 +246,32 @@ static NSString *objClassNameContain = @"NS";
     
     id obj;
     
+    if ([baseClass conformsToProtocol: @protocol(MSJsonSerializing)] && [baseClass respondsToSelector: @selector(keyClass)]) {
+        NSDictionary *keyClassDic = [baseClass keyClass];
+        if (keyClassDic != nil && keyClassDic.allKeys.count > 0) {
+            keyClass = keyClassDic;
+        }
+    }
+    
     if (jsonObj != nil) {
         
         if ([mclass isSubclassOfClass: [NSDictionary class]] && [jsonObj isKindOfClass: [NSDictionary class]]) {
             if (keyClass != nil && [keyClass.allKeys containsObject: keyName]) {
                 mclass = (Class)(keyClass[keyName]);
             }
+            
             NSDictionary *dic = (NSDictionary *)jsonObj;
             obj = [[NSMutableDictionary alloc] init];
             for (NSString *key in dic) {
+                Class tclass = mclass;
                 if ([dic[key] isKindOfClass: [NSArray class]]) { //[dic[key] isKindOfClass: [NSDictionary class]] ||
-                    mclass = [dic[key] class];
+                    tclass = [dic[key] class];
                 }
                 if (keyClass != nil && [keyClass.allKeys containsObject: key]) {
-                    mclass = (Class)(keyClass[key]);
+                    tclass = (Class)(keyClass[key]);
                 }
-                [obj setObject: [MSJsonKit jsonObjToObj: dic[key] asClass: mclass WithKeyClass: keyClass ForKey:keyName baseClass: mclass] forKey: key];
+                
+                [obj setObject: [MSJsonKit jsonObjToObj: dic[key] asClass: tclass WithKeyClass: keyClass ForKey:keyName baseClass: tclass] forKey: key];
             }
         } else if ([mclass isSubclassOfClass: [NSArray class]] && [jsonObj isKindOfClass: [NSArray class]]) {
             if (keyClass !=nil && [keyClass.allKeys containsObject: keyName]) {
@@ -270,10 +280,11 @@ static NSString *objClassNameContain = @"NS";
             NSArray *arr = (NSArray *)jsonObj;
             obj = [[NSMutableArray alloc] init];
             for (int j = 0; j < arr.count; j++) {
+                Class tclass = mclass;
                 if ([arr[j] isKindOfClass: [NSArray class]]) { //[arr[j] isKindOfClass: [NSDictionary class]] ||
-                    mclass = [arr[j] class];
+                    tclass = [arr[j] class];
                 }
-                [obj addObject: [MSJsonKit jsonObjToObj: arr[j] asClass: mclass WithKeyClass: keyClass ForKey:keyName baseClass: mclass]];
+                [obj addObject: [MSJsonKit jsonObjToObj: arr[j] asClass: tclass WithKeyClass: keyClass ForKey:keyName baseClass: tclass]];
             }
         } else if ([mclass isSubclassOfClass: [NSDate class]]) {
             if ([jsonObj isKindOfClass: [NSNull class]]) {
@@ -360,7 +371,7 @@ static NSString *objClassNameContain = @"NS";
                             }
                         } else {
                             if (dic[dicPropName] == nil) {
-
+                                
                             } else {
                                 
                                 [obj setValue: [MSJsonKit jsonObjToObj: dic[dicPropName] asClass: [NSNumber class] WithKeyClass: keyClass ForKey: propName baseClass: mclass] forKey: propName];

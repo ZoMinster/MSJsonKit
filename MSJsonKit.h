@@ -48,6 +48,13 @@
 
 + (NSArray *)toJsonIgnoreKey;
 
+/**
+ *  指定类型为NSArray或者NSDictionary属性的子项的类型
+ *
+ *  @return 类型为NSArray或者NSDictionary属性的子项的类型
+ */
++ (NSDictionary *)keyClass;
+
 @end
 
 @interface MSJsonKit : NSObject
