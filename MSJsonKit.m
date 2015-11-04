@@ -54,7 +54,8 @@ static NSString *objClassNameContain = @"NS";
         //如果是字典
         [json appendString: @"{"];
         int i = 0;
-        for (NSString *keyName in obj) {
+        NSDictionary *o = obj;
+        for (NSString *keyName in o.allKeys) {
             if (i != 0) {
                 [json appendString: @","];
             }
@@ -114,7 +115,7 @@ static NSString *objClassNameContain = @"NS";
             }
             [MSJsonKit objToJson: value out: &json withKey: jsonKeyName baseClass: [obj class] preKey: propName];
 #ifdef DEBUG
-            NSLog(@"key: %@", propName);
+//            NSLog(@"key: %@", propName);
 #endif
             
         }
@@ -138,6 +139,9 @@ static NSString *objClassNameContain = @"NS";
 +(NSString *)objToJson: (id)obj withKey: (NSString *)key {
     NSMutableString *json = nil;
     [MSJsonKit objToJson: obj out: &json withKey: key baseClass: [obj class] preKey: key];
+#ifdef DEBUG
+    NSLog(@"json:\n%@", json);
+#endif
     return json;
 }
 
@@ -271,7 +275,10 @@ static NSString *objClassNameContain = @"NS";
                     tclass = (Class)(keyClass[key]);
                 }
                 
-                [obj setObject: [MSJsonKit jsonObjToObj: dic[key] asClass: tclass WithKeyClass: keyClass ForKey:keyName baseClass: tclass] forKey: key];
+                id value = [MSJsonKit jsonObjToObj: dic[key] asClass: tclass WithKeyClass: keyClass ForKey:keyName baseClass: tclass];
+                if (value && ![value isKindOfClass: [NSNull class]]) {
+                    [obj setValue: value forKey: key];
+                }
             }
         } else if ([mclass isSubclassOfClass: [NSArray class]] && [jsonObj isKindOfClass: [NSArray class]]) {
             if (keyClass !=nil && [keyClass.allKeys containsObject: keyName]) {
@@ -284,7 +291,12 @@ static NSString *objClassNameContain = @"NS";
                 if ([arr[j] isKindOfClass: [NSArray class]]) { //[arr[j] isKindOfClass: [NSDictionary class]] ||
                     tclass = [arr[j] class];
                 }
-                [obj addObject: [MSJsonKit jsonObjToObj: arr[j] asClass: tclass WithKeyClass: keyClass ForKey:keyName baseClass: tclass]];
+                id value = [MSJsonKit jsonObjToObj: arr[j] asClass: tclass WithKeyClass: keyClass ForKey:keyName baseClass: tclass];
+                
+                if (value && ![value isKindOfClass: [NSNull class]]) {
+                    [obj addObject: value];
+                }
+                
             }
         } else if ([mclass isSubclassOfClass: [NSDate class]]) {
             if ([jsonObj isKindOfClass: [NSNull class]]) {
@@ -363,18 +375,25 @@ static NSString *objClassNameContain = @"NS";
                         if (range.length != 0) {
                             NSString *propClassName = [propAttr substringWithRange: range];
 #ifdef DEBUG
-                            NSLog(@"propClassName: %@", propClassName);
+//                            NSLog(@"propClassName: %@", propClassName);
 #endif
                             if ([dic.allKeys containsObject: dicPropName]) {
                                 Class propClass = objc_getClass([propClassName UTF8String]);
-                                [obj setValue: [MSJsonKit jsonObjToObj: dic[dicPropName] asClass: propClass WithKeyClass: keyClass ForKey: propName baseClass: mclass] forKey: propName];
+                                id value = [MSJsonKit jsonObjToObj: dic[dicPropName] asClass: propClass WithKeyClass: keyClass ForKey: propName baseClass: mclass];
+                                
+                                if (value && ![value isKindOfClass: [NSNull class]]) {
+                                    [obj setValue: value forKey: propName];
+                                }
                             }
                         } else {
                             if (dic[dicPropName] == nil) {
                                 
                             } else {
+                                id value = [MSJsonKit jsonObjToObj: dic[dicPropName] asClass: [NSNumber class] WithKeyClass: keyClass ForKey: propName baseClass: mclass];
+                                if (value && ![value isKindOfClass: [NSNull class]]) {
+                                    [obj setValue: value forKey: propName];
+                                }
                                 
-                                [obj setValue: [MSJsonKit jsonObjToObj: dic[dicPropName] asClass: [NSNumber class] WithKeyClass: keyClass ForKey: propName baseClass: mclass] forKey: propName];
                             }
                             
                         }
