@@ -137,6 +137,9 @@ static NSString *objClassNameContain = @"NS";
  *  @param key key
  */
 +(NSString *)objToJson: (id)obj withKey: (NSString *)key {
+    if (obj == nil) {
+        return nil;
+    }
     NSMutableString *json = nil;
     [MSJsonKit objToJson: obj out: &json withKey: key baseClass: [obj class] preKey: key];
 #ifdef DEBUG
@@ -152,6 +155,9 @@ static NSString *objClassNameContain = @"NS";
  * @result (id)
  */
 +(id)jsonToObj: (NSString *)json asClass: (Class)mclass  {
+    if (json == nil) {
+        return nil;
+    }
     return [MSJsonKit jsonToObj: json asClass: mclass WithKeyClass: nil];
 }
 
