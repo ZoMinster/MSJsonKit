@@ -119,6 +119,9 @@ static NSString *objClassNameContain = @"NS";
 #endif
             
         }
+        delete [] props;
+        
+        
         
         [json appendString: @"}"];
     }
@@ -407,6 +410,7 @@ static NSString *objClassNameContain = @"NS";
                 }
                 
             }
+            delete [] props;
         } else if ([jsonObj isKindOfClass: [NSNull class]]) {
             obj = nil;
         } else {
