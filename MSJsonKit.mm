@@ -13,6 +13,9 @@ static NSString *re = @"(?<=T@\")(.*)(?=\",)";
 static NSString *ignorePropNames = @"hash, superclass, description, debugDescription"; //当类实现协议后会自动添加以上四个属性到当前类中，特别是superclass迭代很多十分巨大会递归到死
 static NSString *boolClassNameContain = @"TB";
 static NSString *objClassNameContain = @"NS";
+
+static BOOL sShouldLog = YES;
+
 @implementation MSJsonKit
 
 /**
@@ -145,8 +148,11 @@ static NSString *objClassNameContain = @"NS";
     }
     NSMutableString *json = nil;
     [MSJsonKit objToJson: obj out: &json withKey: key baseClass: [obj class] preKey: key];
+    
 #ifdef DEBUG
-    NSLog(@"json:\n%@", json);
+    if (sShouldLog) {
+        NSLog(@"json:\n%@", json);
+    }
 #endif
     return json;
 }
@@ -183,7 +189,9 @@ static NSString *objClassNameContain = @"NS";
         return jsonObj;
     }
 #ifdef DEBUG
-    NSLog(@"JSON:\n%@", jsonObj);
+    if (sShouldLog) {
+        NSLog(@"JSON:\n%@", jsonObj);
+    }
 #endif
     
     @try {
@@ -211,7 +219,9 @@ static NSString *objClassNameContain = @"NS";
         return jsonObj;
     }
 #ifdef DEBUG
-    NSLog(@"JSON:\n%@", jsonObj);
+    if (sShouldLog) {
+        NSLog(@"JSON:\n%@", jsonObj);
+    }
 #endif
     
     @try {
@@ -238,7 +248,9 @@ static NSString *objClassNameContain = @"NS";
         return jsonObj;
     }
 #ifdef DEBUG
-    NSLog(@"JSON:\n%@", jsonObj);
+    if (sShouldLog) {
+        NSLog(@"JSON:\n%@", jsonObj);
+    }
 #endif
     
     @try {
@@ -510,6 +522,10 @@ static NSString *objClassNameContain = @"NS";
         return json;
     }
     return [NSString stringWithFormat: @"\"%@\":%@", key, json];
+}
+
++ (void)setShouldLog: (BOOL)should_log {
+    sShouldLog = should_log;
 }
 
 @end

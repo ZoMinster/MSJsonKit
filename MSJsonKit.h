@@ -111,6 +111,8 @@
  * @result (id) 转化后的objc对象
  */
 +(id)jsonObjToObj: (id)jsonObj asClass:(Class)mclass;
+
++ (void)setShouldLog: (BOOL)should_log;
 @end
 
 @interface MSJsonKit(Private)
